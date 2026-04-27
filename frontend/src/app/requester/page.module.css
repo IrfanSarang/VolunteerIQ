@@ -1,0 +1,637 @@
+/* ========================================
+   Requester Page — Incident Report Styles
+   ======================================== */
+
+.dashboardLayout {
+  --primary: #0a0f5c;
+  --primary-light: #1a237e;
+  --primary-container: #283593;
+  --secondary: #c62828;
+  --secondary-light: #e53935;
+  --accent-orange: #e65100;
+  --accent-orange-light: #ff8f00;
+  --accent-purple: #6a1b9a;
+  --accent-green: #2e7d32;
+  --background: #f5f7fb;
+  --surface: #ffffff;
+  --surface-dim: #f0f2f8;
+  --on-surface: #0d1b2a;
+  --on-surface-variant: #4a4e69;
+  --outline: #d0d4e4;
+  --outline-variant: #e0e3ef;
+  --shadow-sm: 0 1px 3px rgba(10, 15, 92, 0.06);
+  --shadow-md: 0 4px 16px rgba(10, 15, 92, 0.08);
+  --shadow-lg: 0 8px 32px rgba(10, 15, 92, 0.12);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--background);
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  color: var(--on-surface);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* ---- Top Header Bar ---- */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border-bottom: 1px solid var(--outline-variant);
+  padding: 0.65rem 1.5rem;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.topBarLogo {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -0.5px;
+}
+
+.topBarActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconBtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--outline-variant);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--on-surface-variant);
+  transition: all var(--transition);
+  position: relative;
+}
+
+.iconBtn:hover {
+  background: var(--surface-dim);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.notifDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: var(--secondary);
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+}
+
+.avatarBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%);
+  border: 2px solid var(--outline-variant);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  transition: border-color var(--transition);
+}
+
+.avatarBtn:hover {
+  border-color: var(--primary);
+}
+
+/* ---- Main Content Area ---- */
+.mainArea {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ---- Sidebar ---- */
+.sidebar {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--outline-variant);
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.sidebarProfile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 1rem 1.5rem;
+  border-bottom: 1px solid var(--outline-variant);
+  margin-bottom: 0.75rem;
+}
+
+.profileIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  color: var(--primary);
+  font-size: 1.25rem;
+  border: 2px solid var(--outline-variant);
+  float: left;
+  margin-right: 0.65rem;
+}
+
+.sidebarTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.sidebarTitleText {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1.2;
+}
+
+.sidebarSubtitle {
+  font-size: 0.75rem;
+  color: var(--on-surface-variant);
+  margin-top: 2px;
+}
+
+/* Sidebar Navigation */
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.5rem 0.75rem;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  transition: all var(--transition);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.navItem:hover {
+  background: var(--surface-dim);
+  color: var(--primary);
+}
+
+.navItemActive {
+  background: var(--primary) !important;
+  color: #fff !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(10, 15, 92, 0.25);
+}
+
+/* Sidebar Footer */
+.sidebarFooter {
+  padding: 0.75rem;
+  margin-top: auto;
+}
+
+.exportBtn {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.exportBtn:hover {
+  box-shadow: 0 4px 16px rgba(10, 15, 92, 0.3);
+  transform: translateY(-1px);
+}
+
+/* ---- Center Content (empty/map placeholder) ---- */
+.centerContent {
+  flex: 1;
+  background: var(--background);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---- Right Panel ---- */
+.rightPanel {
+  width: 370px;
+  background: var(--background);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 1rem;
+  gap: 1rem;
+}
+
+/* Alert Banner */
+.alertBanner {
+  background: linear-gradient(135deg, #b71c1c 0%, #c62828 100%);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  color: #fff;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  box-shadow: 0 4px 16px rgba(198, 40, 40, 0.3);
+  animation: alertSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes alertSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alertIcon {
+  font-size: 1.35rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alertContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.alertTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.alertDesc {
+  font-size: 0.82rem;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+/* ---- Incident Report Card ---- */
+.incidentCard {
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.incidentTitle {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.textareaWrapper {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.incidentTextarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  padding-right: 3.5rem;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--on-surface);
+  resize: vertical;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  background: var(--surface);
+  line-height: 1.6;
+}
+
+.incidentTextarea::placeholder {
+  color: var(--on-surface-variant);
+  opacity: 0.7;
+}
+
+.incidentTextarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(10, 15, 92, 0.08);
+}
+
+.micBtn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all var(--transition);
+  box-shadow: 0 2px 8px rgba(10, 15, 92, 0.25);
+}
+
+.micBtn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(10, 15, 92, 0.35);
+}
+
+.micBtn:active {
+  transform: scale(0.95);
+}
+
+/* Action Buttons Row */
+.actionRow {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.locationBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-md);
+  color: var(--on-surface);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition);
+}
+
+.locationBtn:hover {
+  border-color: var(--primary);
+  background: var(--surface-dim);
+  color: var(--primary);
+}
+
+.locationBtn .material-symbols-outlined {
+  font-size: 1.15rem;
+  color: var(--on-surface-variant);
+}
+
+.submitBtn {
+  flex: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition);
+  box-shadow: 0 2px 8px rgba(198, 40, 40, 0.25);
+}
+
+.submitBtn:hover {
+  box-shadow: 0 4px 16px rgba(198, 40, 40, 0.4);
+  transform: translateY(-1px);
+}
+
+.submitBtn:active {
+  transform: translateY(0);
+}
+
+.submitBtn .material-symbols-outlined {
+  font-size: 1.1rem;
+}
+
+/* ---- Recent Report Status Card ---- */
+.statusCard {
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.statusTitle {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--on-surface);
+}
+
+.incidentBadge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-dim);
+  color: var(--on-surface-variant);
+  border: 1px solid var(--outline);
+}
+
+/* Progress Tracker */
+.progressTracker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0.5rem 0;
+}
+
+.progressStep {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.stepCircle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all var(--transition);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.stepCompleted {
+  background: var(--secondary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(198, 40, 40, 0.3);
+}
+
+.stepActive {
+  background: var(--secondary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(198, 40, 40, 0.3);
+  animation: stepPulse 2s ease-in-out infinite;
+}
+
+@keyframes stepPulse {
+  0%, 100% { box-shadow: 0 2px 8px rgba(198, 40, 40, 0.3); }
+  50% { box-shadow: 0 2px 16px rgba(198, 40, 40, 0.5); }
+}
+
+.stepPending {
+  background: var(--surface-dim);
+  color: var(--on-surface-variant);
+  border: 2px solid var(--outline);
+}
+
+.stepConnector {
+  width: 40px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.connectorCompleted {
+  background: var(--secondary);
+}
+
+.connectorPending {
+  background: var(--outline);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 1100px) {
+  .rightPanel {
+    width: 320px;
+  }
+
+  .sidebar {
+    width: 190px;
+  }
+}
+
+@media (max-width: 900px) {
+  .mainArea {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    padding: 0.5rem;
+    border-right: none;
+    border-bottom: 1px solid var(--outline-variant);
+    overflow-x: auto;
+  }
+
+  .sidebarProfile {
+    display: none;
+  }
+
+  .sidebarNav {
+    flex-direction: row;
+    padding: 0;
+    gap: 4px;
+  }
+
+  .navItem {
+    white-space: nowrap;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .sidebarFooter {
+    display: none;
+  }
+
+  .centerContent {
+    display: none;
+  }
+
+  .rightPanel {
+    width: 100%;
+    flex: 1;
+    border-left: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .topBar {
+    padding: 0.5rem 1rem;
+  }
+
+  .rightPanel {
+    padding: 0.75rem;
+  }
+
+  .incidentTitle {
+    font-size: 1.15rem;
+  }
+
+  .actionRow {
+    flex-direction: column;
+  }
+}

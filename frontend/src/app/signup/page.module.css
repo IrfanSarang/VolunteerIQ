@@ -1,0 +1,303 @@
+/* ========================================
+   Signup Page Styles
+   ======================================== */
+
+.pageWrapper {
+  --primary: #0a0f5c;
+  --primary-light: #1a237e;
+  --primary-container: #283593;
+  --secondary: #c62828;
+  --accent-green: #2e7d32;
+  --background: #edf1f9;
+  --surface: #ffffff;
+  --surface-dim: #f0f2f8;
+  --on-surface: #0d1b2a;
+  --on-surface-variant: #4a4e69;
+  --outline: #d0d4e4;
+  --outline-variant: #e0e3ef;
+  --shadow-sm: 0 1px 3px rgba(10, 15, 92, 0.06);
+  --shadow-md: 0 4px 16px rgba(10, 15, 92, 0.08);
+  --shadow-lg: 0 8px 32px rgba(10, 15, 92, 0.12);
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  color: var(--on-surface);
+  -webkit-font-smoothing: antialiased;
+  padding: 2rem 1rem;
+}
+
+/* ---- Branding ---- */
+.branding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.logoIcon {
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.logoText {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -1px;
+}
+
+.heading {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--on-surface);
+  margin-bottom: 0.35rem;
+}
+
+.subheading {
+  font-size: 0.9rem;
+  color: var(--on-surface-variant);
+}
+
+/* ---- Card ---- */
+.card {
+  width: 100%;
+  max-width: 520px;
+  background: var(--surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.25rem 2.25rem;
+  box-shadow: var(--shadow-md);
+}
+
+/* ---- Role Selector ---- */
+.roleSection {
+  margin-bottom: 1.5rem;
+}
+
+.roleLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--on-surface);
+  margin-bottom: 0.75rem;
+}
+
+.roleCards {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.roleCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.85rem 0.5rem;
+  background: var(--surface);
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: inherit;
+  color: var(--on-surface-variant);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.roleCard:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(10, 15, 92, 0.02);
+}
+
+.roleCardActive {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  background: rgba(10, 15, 92, 0.04) !important;
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.roleCard .material-symbols-outlined {
+  font-size: 1.5rem;
+}
+
+/* ---- Form Fields ---- */
+.formGroup {
+  margin-bottom: 1.15rem;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--on-surface);
+  margin-bottom: 0.45rem;
+}
+
+.formLabelNote {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--on-surface-variant);
+  font-size: 0.82rem;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-sm);
+  padding: 0 1rem;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  background: var(--surface);
+}
+
+.inputWrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(10, 15, 92, 0.08);
+}
+
+.inputIcon {
+  color: var(--on-surface-variant);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.formInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0.85rem 0;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--on-surface);
+  background: transparent;
+}
+
+.formInput::placeholder {
+  color: var(--on-surface-variant);
+  opacity: 0.6;
+}
+
+/* ---- Checkbox ---- */
+.checkboxRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--outline);
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.checkboxText {
+  font-size: 0.85rem;
+  color: var(--on-surface-variant);
+  line-height: 1.5;
+}
+
+.checkboxText a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.checkboxText a:hover {
+  text-decoration: underline;
+}
+
+/* ---- Submit Button ---- */
+.submitBtn {
+  width: 100%;
+  padding: 0.95rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(10, 15, 92, 0.25);
+}
+
+.submitBtn:hover {
+  box-shadow: 0 6px 24px rgba(10, 15, 92, 0.35);
+  transform: translateY(-1px);
+}
+
+.submitBtn:active {
+  transform: translateY(0);
+}
+
+/* ---- Bottom Link ---- */
+.bottomLink {
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--on-surface-variant);
+  margin-top: 1.5rem;
+}
+
+.bottomLink a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.bottomLink a:hover {
+  text-decoration: underline;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 540px) {
+  .card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .logoText {
+    font-size: 1.6rem;
+  }
+
+  .heading {
+    font-size: 1.25rem;
+  }
+
+  .roleCards {
+    gap: 0.5rem;
+  }
+}
