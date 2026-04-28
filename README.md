@@ -7,7 +7,7 @@
 | Component | Technology | Why This? |
 | :--- | :--- | :--- |
 | **Frontend** | Next.js + Vanilla CSS | Fast development; one codebase for all 3 views. |
-| **Backend** | FastAPI + Python | 
+| **Backend** | FastAPI + Python | FastAPI is a Python web framework that is used to build APIs. It is known for its speed and ease of use. |
 | **Deployment** | Vercel | Permanently free for hobbyist/hackathon projects. |
 | **Database** | Supabase (Free Tier) | Includes PostGIS for free geospatial (location) queries. |
 | **Maps** | Leaflet.js + OpenStreetMap | No API keys, no credit cards, no usage limits. |

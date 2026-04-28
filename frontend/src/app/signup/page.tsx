@@ -1,143 +1,213 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 import styles from "./page.module.css";
 
-const roles = [
-  { icon: "assignment_ind", label: "Requestor" },
-  { icon: "volunteer_activism", label: "Volunteer" },
-  { icon: "admin_panel_settings", label: "Admin" },
-];
+type Role = "volunteer" | "requester" | "admin";
+
+interface FormErrors {
+  full_name?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  skills?: string;
+  role?: string;
+}
 
 export default function SignupPage() {
-  const [activeRole, setActiveRole] = useState(1);
-  const [agreed, setAgreed] = useState(false);
+  const router = useRouter();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [skills, setSkills] = useState("");
+  const [role, setRole] = useState<Role | null>(null);
+  const [termsChecked, setTermsChecked] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
+    if (!fullName.trim()) newErrors.full_name = "Full name is required.";
+    if (!email.trim()) newErrors.email = "Email is required.";
+    if (!phone.trim()) newErrors.phone = "Phone is required.";
+    if (password.length < 6) newErrors.password = "Password must be at least 6 characters.";
+    if (!skills.trim()) newErrors.skills = "Please enter at least one skill.";
+    if (!role) newErrors.role = "Please select a role.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError("");
+    if (!validate()) return;
+
+    setLoading(true);
+
+    try {
+      // Step a: Sign up
+      const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
+
+      if (signUpError || !data.user) {
+        if (signUpError?.message === "Failed to fetch") {
+          setSubmitError("Cannot connect to database. Please check your Supabase configuration.");
+        } else {
+          setSubmitError(signUpError?.message || "Signup failed. Please try again.");
+        }
+        setLoading(false);
+        return;
+      }
+
+      // Step b: Insert profile
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: data.user.id,
+        full_name: fullName,
+        phone,
+        role,
+        skills: skills.split(",").map((s) => s.trim()).filter(Boolean),
+      });
+
+      if (profileError) {
+        setSubmitError(profileError.message || "Failed to create profile.");
+        setLoading(false);
+        return;
+      }
+
+      // Step c: Redirect
+      router.push("/login?registered=1");
+    } catch (err: any) {
+      setSubmitError(err?.message || "An unexpected error occurred. Please try again.");
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className={styles.pageWrapper}>
-      {/* Branding */}
-      <div className={styles.branding}>
-        <div className={styles.logoRow}>
-          <span className={`material-symbols-outlined ${styles.logoIcon}`}>
-            volunteer_activism
-          </span>
-          <span className={styles.logoText}>VolunteerIQ</span>
-        </div>
-        <h1 className={styles.heading}>Create your account</h1>
-        <p className={styles.subheading}>Join our network of responders and coordinators.</p>
-      </div>
-
-      {/* Card */}
+    <div className={styles.container}>
       <div className={styles.card}>
-        {/* Role Selector */}
-        <div className={styles.roleSection}>
-          <div className={styles.roleLabel}>SELECT YOUR ROLE</div>
-          <div className={styles.roleCards}>
-            {roles.map((role, i) => (
-              <button
-                key={role.label}
-                className={`${styles.roleCard} ${i === activeRole ? styles.roleCardActive : ""}`}
-                onClick={() => setActiveRole(i)}
-              >
-                <span className="material-symbols-outlined">{role.icon}</span>
-                {role.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <h1 className={styles.title}>Create Account</h1>
+        <p className={styles.subtitle}>Join VolunteerIQ today</p>
 
-        {/* Full Name */}
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Full Name</label>
-          <div className={styles.inputWrapper}>
-            <span className={`material-symbols-outlined ${styles.inputIcon}`}>person</span>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          {/* Full Name */}
+          <div className={styles.inputGroup}>
+            <label className={styles.label} htmlFor="full_name">Full Name</label>
             <input
+              id="full_name"
               type="text"
-              className={styles.formInput}
-              placeholder="Jane Doe"
+              className={styles.input}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="John Doe"
             />
+            {errors.full_name && <span className={styles.fieldError}>{errors.full_name}</span>}
           </div>
-        </div>
 
-        {/* Email Address */}
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Email Address</label>
-          <div className={styles.inputWrapper}>
-            <span className={`material-symbols-outlined ${styles.inputIcon}`}>mail</span>
+          {/* Email */}
+          <div className={styles.inputGroup}>
+            <label className={styles.label} htmlFor="email">Email</label>
             <input
+              id="email"
               type="email"
-              className={styles.formInput}
-              placeholder="jane.doe@example.com"
+              className={styles.input}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
             />
+            {errors.email && <span className={styles.fieldError}>{errors.email}</span>}
           </div>
-        </div>
 
-        {/* Phone Number */}
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Phone Number</label>
-          <div className={styles.inputWrapper}>
-            <span className={`material-symbols-outlined ${styles.inputIcon}`}>call</span>
+          {/* Phone */}
+          <div className={styles.inputGroup}>
+            <label className={styles.label} htmlFor="phone">Phone</label>
             <input
+              id="phone"
               type="tel"
-              className={styles.formInput}
-              placeholder="+1 (555) 000-0000"
+              className={styles.input}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+91 9876543210"
             />
+            {errors.phone && <span className={styles.fieldError}>{errors.phone}</span>}
           </div>
-        </div>
 
-        {/* Primary Skills */}
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>
-            Primary Skills <span className={styles.formLabelNote}>(Volunteer specific)</span>
-          </label>
-          <div className={styles.inputWrapper}>
-            <span className={`material-symbols-outlined ${styles.inputIcon}`}>settings_accessibility</span>
+          {/* Password */}
+          <div className={styles.inputGroup}>
+            <label className={styles.label} htmlFor="password">Password</label>
             <input
-              type="text"
-              className={styles.formInput}
-              placeholder="e.g., First Aid, Logistics, Translation"
-            />
-          </div>
-        </div>
-
-        {/* Password */}
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Password</label>
-          <div className={styles.inputWrapper}>
-            <span className={`material-symbols-outlined ${styles.inputIcon}`}>lock</span>
-            <input
+              id="password"
               type="password"
-              className={styles.formInput}
-              placeholder="••••••••"
+              className={styles.input}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Min. 6 characters"
             />
+            {errors.password && <span className={styles.fieldError}>{errors.password}</span>}
           </div>
-        </div>
 
-        {/* Terms Checkbox */}
-        <div className={styles.checkboxRow}>
-          <input
-            type="checkbox"
-            className={styles.checkbox}
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            id="terms"
-          />
-          <label htmlFor="terms" className={styles.checkboxText}>
-            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
-          </label>
-        </div>
+          {/* Skills */}
+          <div className={styles.inputGroup}>
+            <label className={styles.label} htmlFor="skills">Skills (comma-separated)</label>
+            <input
+              id="skills"
+              type="text"
+              className={styles.input}
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+              placeholder="e.g. teaching, first-aid, driving"
+            />
+            {errors.skills && <span className={styles.fieldError}>{errors.skills}</span>}
+          </div>
 
-        {/* Submit */}
-        <button className={styles.submitBtn}>
-          Create Account
-          <span className="material-symbols-outlined">arrow_forward</span>
-        </button>
+          {/* Role Cards */}
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Select Role</label>
+            <div className={styles.roleCards}>
+              {(["volunteer", "requester", "admin"] as Role[]).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  className={`${styles.roleCard} ${role === r ? styles.activeRole : ""}`}
+                  onClick={() => setRole(r)}
+                >
+                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                </button>
+              ))}
+            </div>
+            {errors.role && <span className={styles.fieldError}>{errors.role}</span>}
+          </div>
 
-        {/* Bottom Link */}
-        <div className={styles.bottomLink}>
-          Already have an account? <Link href="/login">Login here</Link>
-        </div>
+          {/* Terms */}
+          <div className={styles.checkboxGroup}>
+            <input
+              id="terms"
+              type="checkbox"
+              checked={termsChecked}
+              onChange={(e) => setTermsChecked(e.target.checked)}
+            />
+            <label htmlFor="terms" className={styles.checkboxLabel}>
+              I agree to the Terms & Conditions
+            </label>
+          </div>
+
+          {submitError && <div className={styles.errorMsg}>{submitError}</div>}
+
+          <button
+            type="submit"
+            className={styles.submitBtn}
+            disabled={!termsChecked || loading}
+          >
+            {loading ? <span className={styles.spinner} /> : "Create Account"}
+          </button>
+        </form>
+
+        <p className={styles.footerText}>
+          Already have an account?{" "}
+          <a href="/login" className={styles.link}>Sign in</a>
+        </p>
       </div>
     </div>
   );

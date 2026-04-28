@@ -1,92 +1,113 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 import styles from "./page.module.css";
 
-const roles = ["Volunteer", "Requestor", "Admin"];
-
 export default function LoginPage() {
-  const [activeRole, setActiveRole] = useState(0);
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"volunteer" | "requester" | "admin">("volunteer");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (signInError || !data.user) {
+        if (signInError?.message === "Failed to fetch") {
+          setError("Cannot connect to database. Please check your Supabase configuration.");
+        } else {
+          setError(signInError?.message || "Login failed. Please try again.");
+        }
+        setLoading(false);
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profileError || !profile) {
+        setError("Could not fetch user profile. Please contact support.");
+        setLoading(false);
+        return;
+      }
+
+      router.push(`/${profile.role}`);
+    } catch (err: any) {
+      setError(err?.message || "An unexpected error occurred. Please try again.");
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className={styles.pageWrapper}>
-      {/* Branding */}
-      <div className={styles.branding}>
-        <div className={styles.logoIcon}>
-          <span className="material-symbols-outlined">volunteer_activism</span>
-        </div>
-        <div className={styles.logoText}>VolunteerIQ</div>
-        <div className={styles.logoSubtext}>Authority and Precision in Coordination</div>
-      </div>
-
-      {/* Card */}
+    <div className={styles.container}>
       <div className={styles.card}>
-        {/* Role Selector */}
-        <div className={styles.roleSection}>
-          <div className={styles.roleLabel}>SELECT ROLE</div>
-          <div className={styles.roleTabs}>
-            {roles.map((role, i) => (
-              <button
-                key={role}
-                className={`${styles.roleTab} ${i === activeRole ? styles.roleTabActive : ""}`}
-                onClick={() => setActiveRole(i)}
-              >
-                {role}
-              </button>
-            ))}
-          </div>
+        <h1 className={styles.title}>Welcome Back</h1>
+        <p className={styles.subtitle}>Sign in to your VolunteerIQ account</p>
+
+        {/* Role selector tabs — UI only */}
+        <div className={styles.tabs}>
+          {(["volunteer", "requester", "admin"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={`${styles.tab} ${activeTab === tab ? styles.activeTab : ""}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
 
-        {/* Email Field */}
-        <div className={styles.formGroup}>
-          <div className={styles.formLabelRow}>
-            <label className={styles.formLabel}>Email / Username</label>
-          </div>
-          <div className={styles.inputWrapper}>
-            <span className={`material-symbols-outlined ${styles.inputIcon}`}>person</span>
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label} htmlFor="email">Email</label>
             <input
+              id="email"
               type="email"
-              className={styles.formInput}
-              placeholder="user@example.com"
+              className={styles.input}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="you@example.com"
             />
           </div>
-        </div>
 
-        {/* Password Field */}
-        <div className={styles.formGroup}>
-          <div className={styles.formLabelRow}>
-            <label className={styles.formLabel}>Password</label>
-            <a href="#" className={styles.forgotLink}>Forgot Password?</a>
-          </div>
-          <div className={styles.inputWrapper}>
-            <span className={`material-symbols-outlined ${styles.inputIcon}`}>lock</span>
+          <div className={styles.inputGroup}>
+            <label className={styles.label} htmlFor="password">Password</label>
             <input
+              id="password"
               type="password"
-              className={styles.formInput}
+              className={styles.input}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               placeholder="••••••••"
             />
           </div>
-        </div>
 
-        {/* Submit */}
-        <button className={styles.submitBtn}>
-          Login
-          <span className="material-symbols-outlined">login</span>
-        </button>
+          {error && <div className={styles.errorMsg}>{error}</div>}
 
-        <div className={styles.divider} />
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
+            {loading ? <span className={styles.spinner} /> : "Sign In"}
+          </button>
+        </form>
 
-        {/* Bottom Link */}
-        <div className={styles.bottomLink}>
-          Don&apos;t have an account? <Link href="/signup">Sign up</Link>
-        </div>
-      </div>
-
-      {/* Footer Badge */}
-      <div className={styles.footerBadge}>
-        <span className="material-symbols-outlined">shield</span>
-        Secure Institutional Access
+        <p className={styles.footerText}>
+          Don't have an account?{" "}
+          <a href="/signup" className={styles.link}>Sign up</a>
+        </p>
       </div>
     </div>
   );
