@@ -63,7 +63,7 @@ function haversineKm(
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function VolunteerPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const role = profile?.role;
   const router = useRouter();
 
@@ -248,9 +248,15 @@ export default function VolunteerPage() {
       <div className={styles.header}>
         <h1 className={styles.heading}>Volunteer Dashboard</h1>
 
-        <button onClick={handleToggleOnline}>
-          {isOnline ? "Online" : "Offline"}
-        </button>
+         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button onClick={handleToggleOnline}>
+            {isOnline ? "Online" : "Offline"}
+          </button>
+          <button onClick={signOut} style={{ background: 'none', border: '1px solid #e2e8f0', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
+            Sign Out
+          </button>
+        </div>
       </div>
 
       <div className={styles.tabs}>

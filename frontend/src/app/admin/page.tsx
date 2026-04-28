@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import styles from "./page.module.css";
 import { supabase } from "@/lib/supabaseClient";  // ✅ shared singleton
+import { useAuth } from "@/context/AuthContext";
 
 interface Incident {
   id: string;
@@ -43,17 +44,27 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [assignModal, setAssignModal] = useState<Incident | null>(null);
+  const { signOut } = useAuth();
 
   useEffect(() => {
     async function fetchData() {
-      setLoading(true);
-      const [{ data: inc }, { data: vol }] = await Promise.all([
-        supabase.from("incidents").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("*").eq("role", "volunteer"),
-      ]);
-      setIncidents(inc || []);
-      setVolunteers(vol || []);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const [{ data: inc, error: incErr }, { data: vol, error: volErr }] = await Promise.all([
+          supabase.from("incidents").select("*").order("created_at", { ascending: false }),
+          supabase.from("profiles").select("*").eq("role", "volunteer"),
+        ]);
+        
+        if (incErr) console.error("Error fetching incidents:", incErr);
+        if (volErr) console.error("Error fetching volunteers:", volErr);
+        
+        setIncidents(inc || []);
+        setVolunteers(vol || []);
+      } catch (err) {
+        console.error("Critical error in fetchData:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchData();
 
@@ -181,8 +192,8 @@ export default function AdminPage() {
           <button className={styles.iconBtn}>
             <span className="material-symbols-outlined">settings</span>
           </button>
-          <button className={styles.avatarBtn}>
-            <span className="material-symbols-outlined">person</span>
+           <button className={styles.avatarBtn} onClick={signOut} title="Sign Out">
+            <span className="material-symbols-outlined">logout</span>
           </button>
         </div>
       </header>

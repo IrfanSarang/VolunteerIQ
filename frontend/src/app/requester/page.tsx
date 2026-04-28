@@ -14,7 +14,7 @@ const navItems = [
 ];
 
 export default function RequesterPage() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   const [activeNav, setActiveNav] = useState(-1);
   const [reportText, setReportText] = useState("");
@@ -157,8 +157,23 @@ export default function RequesterPage() {
   /* ---------------- UI ---------------- */
   return (
     <div className={styles.dashboardLayout}>
-      <header className={styles.topBar}>
+       <header className={styles.topBar}>
         <div className={styles.topBarLogo}>VolunteerIQ</div>
+        <button 
+          onClick={signOut} 
+          style={{ 
+            background: "none", 
+            border: "none", 
+            color: "#64748b", 
+            cursor: "pointer", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "4px" 
+          }}
+        >
+          <span className="material-symbols-outlined">logout</span>
+          Sign Out
+        </button>
       </header>
 
       <div className={styles.mainArea}>

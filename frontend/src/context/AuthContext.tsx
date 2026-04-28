@@ -51,10 +51,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             .single()
 
         if (error) {
-            console.error('Error fetching profile:', error)
-            return null
+            // PGRST116 means no rows were found (common during signup)
+            if (error.code === '42P17') {
+                console.error("[AUTH_CRITICAL] Infinite recursion detected in Supabase RLS policies. This is a database configuration issue.");
+            } else if (error.code !== 'PGRST116') {
+                console.error(`[PROFILE_ERROR] Code: ${error.code} | Message: ${error.message} | Details: ${error.details}`);
+            }
+            return null;
         }
-        return data as Profile
+        return data as Profile;
     }
 
     useEffect(() => {

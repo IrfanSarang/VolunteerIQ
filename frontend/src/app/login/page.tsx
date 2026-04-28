@@ -18,9 +18,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      console.log("Attempting sign in for:", email);
       const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
       if (signInError || !data.user) {
+        console.error("Sign in error:", signInError);
         if (signInError?.message === "Failed to fetch") {
           setError("Cannot connect to database. Please check your Supabase configuration.");
         } else {
@@ -30,6 +32,7 @@ export default function LoginPage() {
         return;
       }
 
+      console.log("Sign in successful, fetching profile for:", data.user.id);
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
@@ -37,13 +40,40 @@ export default function LoginPage() {
         .single();
 
       if (profileError || !profile) {
+        console.error("Profile fetch error:", profileError);
         setError("Could not fetch user profile. Please contact support.");
         setLoading(false);
         return;
       }
 
-      router.push(`/${profile.role}`);
+      console.log("Profile found, role:", profile.role);
+      
+      // Normalize role and determine target path
+      const role = (profile.role || "").toLowerCase().trim();
+      let targetPath = `/${role}`;
+      
+      if (role === "receiver" || role === "requester") {
+        targetPath = "/requester";
+      } else if (role === "volunteer" || role === "volunterr") {
+        targetPath = "/volunteer";
+      } else if (role === "admin") {
+        targetPath = "/admin";
+      } else {
+        console.warn("Unknown role detected, falling back to root:", role);
+        targetPath = "/";
+      }
+
+      console.log("Redirecting to target path:", targetPath);
+      router.push(targetPath);
+      // Fallback: forcefully change location if router.push fails to trigger
+      setTimeout(() => {
+        if (window.location.pathname === "/login") {
+          console.log("Router push might have stalled, using window.location...");
+          window.location.href = targetPath;
+        }
+      }, 2000);
     } catch (err: any) {
+      console.error("Unexpected login error:", err);
       setError(err?.message || "An unexpected error occurred. Please try again.");
       setLoading(false);
     }

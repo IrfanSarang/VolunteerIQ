@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import styles from "./page.module.css";
 
-// ✅ removed "admin"
+
 type Role = "volunteer" | "requester";
 
 interface FormErrors {

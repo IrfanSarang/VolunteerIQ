@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -80,7 +80,9 @@ export async function middleware(request: NextRequest) {
       // Where to redirect? We need to know their role.
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       if (profile && profile.role) {
-        return NextResponse.redirect(new URL(`/${profile.role}`, request.url))
+        let role = profile.role;
+        if (role === 'receiver') role = 'requester';
+        return NextResponse.redirect(new URL(`/${role}`, request.url))
       }
       return NextResponse.redirect(new URL('/', request.url))
     }
@@ -103,14 +105,16 @@ export async function middleware(request: NextRequest) {
     }
 
     // Ensure users can only access their specific dashboard
-    if (pathname.startsWith('/admin') && role !== 'admin') {
-      return NextResponse.redirect(new URL(`/${role}`, request.url))
+    const mappedRole = role === 'receiver' ? 'requester' : role;
+
+    if (pathname.startsWith('/admin') && mappedRole !== 'admin') {
+      return NextResponse.redirect(new URL(`/${mappedRole}`, request.url))
     }
-    if (pathname.startsWith('/volunteer') && role !== 'volunteer') {
-      return NextResponse.redirect(new URL(`/${role}`, request.url))
+    if (pathname.startsWith('/volunteer') && mappedRole !== 'volunteer') {
+      return NextResponse.redirect(new URL(`/${mappedRole}`, request.url))
     }
-    if (pathname.startsWith('/requester') && role !== 'requester') {
-      return NextResponse.redirect(new URL(`/${role}`, request.url))
+    if (pathname.startsWith('/requester') && mappedRole !== 'requester') {
+      return NextResponse.redirect(new URL(`/${mappedRole}`, request.url))
     }
   }
 
