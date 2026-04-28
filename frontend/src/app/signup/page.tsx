@@ -35,7 +35,7 @@ export default function SignupPage() {
     if (!email.trim()) newErrors.email = "Email is required.";
     if (!phone.trim()) newErrors.phone = "Phone is required.";
     if (password.length < 6) newErrors.password = "Password must be at least 6 characters.";
-    if (!skills.trim()) newErrors.skills = "Please enter at least one skill.";
+    if (!skills.trim() && role === "volunteer") newErrors.skills = "Please enter at least one skill.";
     if (!role) newErrors.role = "Please select a role.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -49,7 +49,6 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // Step a: Sign up
       const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
 
       if (signUpError || !data.user) {
@@ -62,13 +61,12 @@ export default function SignupPage() {
         return;
       }
 
-      // Step b: Insert profile
       const { error: profileError } = await supabase.from("profiles").insert({
         id: data.user.id,
         full_name: fullName,
         phone,
         role,
-        skills: skills.split(",").map((s) => s.trim()).filter(Boolean),
+        skills: skills ? skills.split(",").map((s) => s.trim()).filter(Boolean) : [],
       });
 
       if (profileError) {
@@ -77,7 +75,6 @@ export default function SignupPage() {
         return;
       }
 
-      // Step c: Redirect
       router.push("/login?registered=1");
     } catch (err: any) {
       setSubmitError(err?.message || "An unexpected error occurred. Please try again.");
@@ -86,128 +83,147 @@ export default function SignupPage() {
   };
 
   return (
-    <div className={styles.container}>
+    <div className={styles.pageWrapper}>
+      <div className={styles.branding}>
+        <div className={styles.logoRow}>
+          <span className={`material-symbols-outlined ${styles.logoIcon}`}>emergency</span>
+          <div className={styles.logoText}>VolunteerIQ</div>
+        </div>
+      </div>
+
       <div className={styles.card}>
-        <h1 className={styles.title}>Create Account</h1>
-        <p className={styles.subtitle}>Join VolunteerIQ today</p>
+        <h1 className={styles.heading}>Create Account</h1>
+        <p className={styles.subheading}>Join VolunteerIQ today</p>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Full Name */}
-          <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="full_name">Full Name</label>
-            <input
-              id="full_name"
-              type="text"
-              className={styles.input}
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="John Doe"
-            />
-            {errors.full_name && <span className={styles.fieldError}>{errors.full_name}</span>}
-          </div>
-
-          {/* Email */}
-          <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              className={styles.input}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-            />
-            {errors.email && <span className={styles.fieldError}>{errors.email}</span>}
-          </div>
-
-          {/* Phone */}
-          <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="phone">Phone</label>
-            <input
-              id="phone"
-              type="tel"
-              className={styles.input}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+91 9876543210"
-            />
-            {errors.phone && <span className={styles.fieldError}>{errors.phone}</span>}
-          </div>
-
-          {/* Password */}
-          <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              className={styles.input}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 6 characters"
-            />
-            {errors.password && <span className={styles.fieldError}>{errors.password}</span>}
-          </div>
-
-          {/* Skills */}
-          <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="skills">Skills (comma-separated)</label>
-            <input
-              id="skills"
-              type="text"
-              className={styles.input}
-              value={skills}
-              onChange={(e) => setSkills(e.target.value)}
-              placeholder="e.g. teaching, first-aid, driving"
-            />
-            {errors.skills && <span className={styles.fieldError}>{errors.skills}</span>}
-          </div>
-
-          {/* Role Cards */}
-          <div className={styles.inputGroup}>
-            <label className={styles.label}>Select Role</label>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.roleSection}>
+            <div className={styles.roleLabel}>Select Role</div>
             <div className={styles.roleCards}>
               {(["volunteer", "requester", "admin"] as Role[]).map((r) => (
                 <button
                   key={r}
                   type="button"
-                  className={`${styles.roleCard} ${role === r ? styles.activeRole : ""}`}
+                  className={`${styles.roleCard} ${role === r ? styles.roleCardActive : ""}`}
                   onClick={() => setRole(r)}
                 >
+                  <span className="material-symbols-outlined">
+                    {r === "volunteer" ? "volunteer_activism" : r === "admin" ? "admin_panel_settings" : "person_alert"}
+                  </span>
                   {r.charAt(0).toUpperCase() + r.slice(1)}
                 </button>
               ))}
             </div>
-            {errors.role && <span className={styles.fieldError}>{errors.role}</span>}
+            {errors.role && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.role}</div>}
           </div>
 
-          {/* Terms */}
-          <div className={styles.checkboxGroup}>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="full_name">Full Name</label>
+            <div className={styles.inputWrapper}>
+              <span className={`material-symbols-outlined ${styles.inputIcon}`}>person</span>
+              <input
+                id="full_name"
+                type="text"
+                className={styles.formInput}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="John Doe"
+              />
+            </div>
+            {errors.full_name && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.full_name}</div>}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="email">Email</label>
+            <div className={styles.inputWrapper}>
+              <span className={`material-symbols-outlined ${styles.inputIcon}`}>mail</span>
+              <input
+                id="email"
+                type="email"
+                className={styles.formInput}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+            {errors.email && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.email}</div>}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="phone">Phone Number</label>
+            <div className={styles.inputWrapper}>
+              <span className={`material-symbols-outlined ${styles.inputIcon}`}>call</span>
+              <input
+                id="phone"
+                type="tel"
+                className={styles.formInput}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1 (555) 000-0000"
+              />
+            </div>
+            {errors.phone && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.phone}</div>}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="password">Password</label>
+            <div className={styles.inputWrapper}>
+              <span className={`material-symbols-outlined ${styles.inputIcon}`}>lock</span>
+              <input
+                id="password"
+                type="password"
+                className={styles.formInput}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Min. 6 characters"
+              />
+            </div>
+            {errors.password && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.password}</div>}
+          </div>
+
+          {role === "volunteer" && (
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel} htmlFor="skills">
+                Skills <span className={styles.formLabelNote}>(comma-separated)</span>
+              </label>
+              <div className={styles.inputWrapper}>
+                <span className={`material-symbols-outlined ${styles.inputIcon}`}>build</span>
+                <input
+                  id="skills"
+                  type="text"
+                  className={styles.formInput}
+                  value={skills}
+                  onChange={(e) => setSkills(e.target.value)}
+                  placeholder="e.g. first-aid, driving, logistics"
+                />
+              </div>
+              {errors.skills && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.skills}</div>}
+            </div>
+          )}
+
+          <div className={styles.checkboxRow}>
             <input
               id="terms"
               type="checkbox"
+              className={styles.checkbox}
               checked={termsChecked}
               onChange={(e) => setTermsChecked(e.target.checked)}
             />
-            <label htmlFor="terms" className={styles.checkboxLabel}>
-              I agree to the Terms & Conditions
+            <label htmlFor="terms" className={styles.checkboxText}>
+              I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>.
             </label>
           </div>
 
-          {submitError && <div className={styles.errorMsg}>{submitError}</div>}
+          {submitError && <div style={{ color: "#c62828", fontSize: "0.85rem", marginBottom: "1rem", textAlign: "center", fontWeight: 600 }}>{submitError}</div>}
 
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={!termsChecked || loading}
-          >
-            {loading ? <span className={styles.spinner} /> : "Create Account"}
+          <button type="submit" className={styles.submitBtn} disabled={!termsChecked || loading}>
+            {loading ? <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite" }}>sync</span> : "Create Account"}
           </button>
         </form>
 
-        <p className={styles.footerText}>
+        <div className={styles.bottomLink}>
           Already have an account?{" "}
-          <a href="/login" className={styles.link}>Sign in</a>
-        </p>
+          <a href="/login">Sign in</a>
+        </div>
       </div>
     </div>
   );

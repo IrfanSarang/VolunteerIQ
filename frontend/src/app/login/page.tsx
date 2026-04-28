@@ -51,63 +51,89 @@ export default function LoginPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Welcome Back</h1>
-        <p className={styles.subtitle}>Sign in to your VolunteerIQ account</p>
+    <div className={styles.pageWrapper}>
+      <div className={styles.branding}>
+        <div className={styles.logoIcon}>
+          <span className="material-symbols-outlined">hub</span>
+        </div>
+        <div className={styles.logoText}>VolunteerIQ</div>
+        <div className={styles.logoSubtext}>Secure Access Portal</div>
+      </div>
 
-        {/* Role selector tabs — UI only */}
-        <div className={styles.tabs}>
-          {(["volunteer", "requester", "admin"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              className={`${styles.tab} ${activeTab === tab ? styles.activeTab : ""}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+      <div className={styles.card}>
+        <div className={styles.roleSection}>
+          <div className={styles.roleLabel}>Select Your Role</div>
+          <div className={styles.roleTabs}>
+            {(["volunteer", "requester", "admin"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                className={`${styles.roleTab} ${activeTab === tab ? styles.roleTabActive : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              className={styles.input}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="you@example.com"
-            />
+        <form onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <div className={styles.formLabelRow}>
+              <label className={styles.formLabel} htmlFor="email">Email Address</label>
+            </div>
+            <div className={styles.inputWrapper}>
+              <span className={`material-symbols-outlined ${styles.inputIcon}`}>mail</span>
+              <input
+                id="email"
+                type="email"
+                className={styles.formInput}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="you@example.com"
+              />
+            </div>
           </div>
 
-          <div className={styles.inputGroup}>
-            <label className={styles.label} htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              className={styles.input}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-            />
+          <div className={styles.formGroup}>
+            <div className={styles.formLabelRow}>
+              <label className={styles.formLabel} htmlFor="password">Password</label>
+              <a href="#" className={styles.forgotLink}>Forgot?</a>
+            </div>
+            <div className={styles.inputWrapper}>
+              <span className={`material-symbols-outlined ${styles.inputIcon}`}>lock</span>
+              <input
+                id="password"
+                type="password"
+                className={styles.formInput}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+              />
+            </div>
           </div>
 
-          {error && <div className={styles.errorMsg}>{error}</div>}
+          {error && <div style={{ color: "#c62828", fontSize: "0.85rem", marginTop: "1rem", textAlign: "center", fontWeight: 600 }}>{error}</div>}
 
           <button type="submit" className={styles.submitBtn} disabled={loading}>
             {loading ? <span className={styles.spinner} /> : "Sign In"}
+            {!loading && <span className="material-symbols-outlined">login</span>}
           </button>
         </form>
 
-        <p className={styles.footerText}>
+        <div className={styles.divider} />
+
+        <div className={styles.bottomLink}>
           Don't have an account?{" "}
-          <a href="/signup" className={styles.link}>Sign up</a>
-        </p>
+          <a href="/signup">Sign up</a>
+        </div>
+      </div>
+
+      <div className={styles.footerBadge}>
+        <span className="material-symbols-outlined">shield</span>
+        Protected by enterprise-grade security
       </div>
     </div>
   );
