@@ -4,9 +4,9 @@ import time
 from collections import defaultdict
 from math import radians, sin, cos, sqrt, atan2
 
-from backend.auth import get_current_user
-from backend.database import supabase
-from backend.nlp.scorer import score_incident
+from routers.auth import get_current_user
+from database import supabase
+from nlp.scorer import score_incident
 
 router = APIRouter(prefix="/ai", tags=["AI"])
 
@@ -169,7 +169,7 @@ async def match_volunteer(
     try:
         inc_resp = (
             supabase.table("incidents")
-            .select("id, category, latitude, longitude")
+            .select("id, category, location")  # FIX BUG-09: location is a PostGIS POINT, not lat/lng columns
             .eq("id", body.incident_id)
             .single()
             .execute()
@@ -181,15 +181,25 @@ async def match_volunteer(
         raise HTTPException(status_code=404, detail="Incident not found.")
 
     incident = inc_resp.data
-    inc_lat = incident.get("latitude")
-    inc_lon = incident.get("longitude")
     category = (incident.get("category") or "").lower()
+
+    # FIX BUG-09: Parse PostGIS "POINT(lng lat)" string instead of reading non-existent columns
+    inc_lat, inc_lon = None, None
+    location_str = incident.get("location") or ""
+    if location_str.upper().startswith("POINT("):
+        try:
+            coords = location_str[6:-1].split()  # strip "POINT(" and ")"
+            inc_lon = float(coords[0])
+            inc_lat = float(coords[1])
+        except (IndexError, ValueError):
+            pass  # leave as None; distance will be inf for all volunteers
 
     # ── Fetch volunteers ──
     try:
         vol_resp = (
-            supabase.table("volunteers")
+            supabase.table("profiles")  # FIX BUG-09: was "volunteers", correct table is "profiles"
             .select("id, full_name, skills, latitude, longitude")
+            .eq("role", "volunteer")   # FIX BUG-09: filter to volunteers only
             .eq("is_online", True)
             .execute()
         )
@@ -230,7 +240,7 @@ async def match_volunteer(
                 "status": "assigned",
             }).eq("id", body.incident_id).execute()
         except Exception:
-            pass  # don’t fail request if assignment fails
+            pass  # don't fail request if assignment fails
 
     # ── Response ──
     return [

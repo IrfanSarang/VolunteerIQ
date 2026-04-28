@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import styles from "./page.module.css";
 
-type Role = "volunteer" | "requester" | "admin";
+// ✅ removed "admin"
+type Role = "volunteer" | "requester";
 
 interface FormErrors {
   full_name?: string;
@@ -99,7 +100,8 @@ export default function SignupPage() {
           <div className={styles.roleSection}>
             <div className={styles.roleLabel}>Select Role</div>
             <div className={styles.roleCards}>
-              {(["volunteer", "requester", "admin"] as Role[]).map((r) => (
+              {/* ✅ only 2 roles now */}
+              {(["volunteer", "requester"] as Role[]).map((r) => (
                 <button
                   key={r}
                   type="button"
@@ -107,13 +109,17 @@ export default function SignupPage() {
                   onClick={() => setRole(r)}
                 >
                   <span className="material-symbols-outlined">
-                    {r === "volunteer" ? "volunteer_activism" : r === "admin" ? "admin_panel_settings" : "person_alert"}
+                    {r === "volunteer" ? "volunteer_activism" : "person_alert"}
                   </span>
                   {r.charAt(0).toUpperCase() + r.slice(1)}
                 </button>
               ))}
             </div>
-            {errors.role && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.role}</div>}
+            {errors.role && (
+              <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>
+                {errors.role}
+              </div>
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -129,7 +135,7 @@ export default function SignupPage() {
                 placeholder="John Doe"
               />
             </div>
-            {errors.full_name && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.full_name}</div>}
+            {errors.full_name && <div style={{ color: "#c62828", fontSize: "0.75rem" }}>{errors.full_name}</div>}
           </div>
 
           <div className={styles.formGroup}>
@@ -145,7 +151,7 @@ export default function SignupPage() {
                 placeholder="you@example.com"
               />
             </div>
-            {errors.email && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.email}</div>}
+            {errors.email && <div style={{ color: "#c62828", fontSize: "0.75rem" }}>{errors.email}</div>}
           </div>
 
           <div className={styles.formGroup}>
@@ -161,7 +167,7 @@ export default function SignupPage() {
                 placeholder="+1 (555) 000-0000"
               />
             </div>
-            {errors.phone && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.phone}</div>}
+            {errors.phone && <div style={{ color: "#c62828", fontSize: "0.75rem" }}>{errors.phone}</div>}
           </div>
 
           <div className={styles.formGroup}>
@@ -177,7 +183,7 @@ export default function SignupPage() {
                 placeholder="Min. 6 characters"
               />
             </div>
-            {errors.password && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.password}</div>}
+            {errors.password && <div style={{ color: "#c62828", fontSize: "0.75rem" }}>{errors.password}</div>}
           </div>
 
           {role === "volunteer" && (
@@ -196,7 +202,7 @@ export default function SignupPage() {
                   placeholder="e.g. first-aid, driving, logistics"
                 />
               </div>
-              {errors.skills && <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>{errors.skills}</div>}
+              {errors.skills && <div style={{ color: "#c62828", fontSize: "0.75rem" }}>{errors.skills}</div>}
             </div>
           )}
 
@@ -213,16 +219,25 @@ export default function SignupPage() {
             </label>
           </div>
 
-          {submitError && <div style={{ color: "#c62828", fontSize: "0.85rem", marginBottom: "1rem", textAlign: "center", fontWeight: 600 }}>{submitError}</div>}
+          {submitError && (
+            <div style={{ color: "#c62828", fontSize: "0.85rem", marginBottom: "1rem", textAlign: "center", fontWeight: 600 }}>
+              {submitError}
+            </div>
+          )}
 
           <button type="submit" className={styles.submitBtn} disabled={!termsChecked || loading}>
-            {loading ? <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite" }}>sync</span> : "Create Account"}
+            {loading ? (
+              <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite" }}>
+                sync
+              </span>
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
 
         <div className={styles.bottomLink}>
-          Already have an account?{" "}
-          <a href="/login">Sign in</a>
+          Already have an account? <a href="/login">Sign in</a>
         </div>
       </div>
     </div>

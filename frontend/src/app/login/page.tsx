@@ -11,7 +11,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"volunteer" | "requester" | "admin">("volunteer");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,22 +60,6 @@ export default function LoginPage() {
       </div>
 
       <div className={styles.card}>
-        <div className={styles.roleSection}>
-          <div className={styles.roleLabel}>Select Your Role</div>
-          <div className={styles.roleTabs}>
-            {(["volunteer", "requester", "admin"] as const).map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                className={`${styles.roleTab} ${activeTab === tab ? styles.roleTabActive : ""}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <div className={styles.formLabelRow}>
@@ -115,7 +98,19 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {error && <div style={{ color: "#c62828", fontSize: "0.85rem", marginTop: "1rem", textAlign: "center", fontWeight: 600 }}>{error}</div>}
+          {error && (
+            <div
+              style={{
+                color: "#c62828",
+                fontSize: "0.85rem",
+                marginTop: "1rem",
+                textAlign: "center",
+                fontWeight: 600,
+              }}
+            >
+              {error}
+            </div>
+          )}
 
           <button type="submit" className={styles.submitBtn} disabled={loading}>
             {loading ? <span className={styles.spinner} /> : "Sign In"}

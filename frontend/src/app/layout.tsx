@@ -1,13 +1,10 @@
-// frontend/src/app/layout.tsx
 import type { Metadata } from 'next'
 import { AuthProvider } from '../context/AuthContext'
-
-// Keep your existing Google Material Symbols import below:
-import './globals.css' // or wherever your global styles are
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Your App Name',
-  description: 'Your app description',
+  title: 'VolunteerIQ — Crisis Response Coordination',
+  description: 'AI-powered volunteer coordination platform for rapid crisis response.',
 }
 
 export default function RootLayout({
@@ -18,10 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google Material Symbols — keep your existing link tag here */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
       </head>
       <body>

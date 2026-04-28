@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import styles from "./page.module.css";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabaseClient";  // ✅ shared singleton
 
 interface Incident {
   id: string;
@@ -26,10 +26,7 @@ interface Volunteer {
   is_online?: boolean;
 }
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// ✅ Removed: createClient import and local supabase const
 
 function urgencyColor(score: number) {
   if (score >= 8) return "#ef4444";
@@ -51,8 +48,8 @@ export default function AdminPage() {
     async function fetchData() {
       setLoading(true);
       const [{ data: inc }, { data: vol }] = await Promise.all([
-        supabase.from("incidents").select("*").order("reported_at", { ascending: false }),
-        supabase.from("volunteers").select("*"),
+        supabase.from("incidents").select("*").order("created_at", { ascending: false }),
+        supabase.from("profiles").select("*").eq("role", "volunteer"),
       ]);
       setIncidents(inc || []);
       setVolunteers(vol || []);

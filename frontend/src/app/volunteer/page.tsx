@@ -51,7 +51,7 @@ function haversineKm(
 ): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const dLon = ((lat2 - lon1) * Math.PI) / 180;
   const a =
     Math.sin(dLat / 2) ** 2 +
     Math.cos((lat1 * Math.PI) / 180) *
@@ -74,22 +74,16 @@ export default function VolunteerPage() {
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // ─── Auth Guard ────────────────────────────────────────────────────────────
-
   useEffect(() => {
     if (user === null || profile === null) return;
     if (role !== "volunteer") router.replace("/login");
   }, [user, profile, role, router]);
-
-  // ─── Browser Geolocation ───────────────────────────────────────────────────
 
   useEffect(() => {
     navigator.geolocation?.getCurrentPosition((pos) => {
       setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
     });
   }, []);
-
-  // ─── Load Online Status ────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!user) return;
@@ -102,8 +96,6 @@ export default function VolunteerPage() {
       if (data) setIsOnline(data.is_online ?? false);
     })();
   }, [user]);
-
-  // ─── Fetch Incidents ───────────────────────────────────────────────────────
 
   const fetchIncidents = useCallback(async () => {
     const { data, error } = await supabase
@@ -119,16 +111,14 @@ export default function VolunteerPage() {
     fetchIncidents();
   }, [fetchIncidents]);
 
-  // ─── Realtime Subscription ─────────────────────────────────────────────────
-
   useEffect(() => {
     const channel = supabase
-      .channel('incidents-realtime')
+      .channel("incidents-realtime")
       .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'incidents' },
+        "postgres_changes",
+        { event: "*", schema: "public", table: "incidents" },
         (payload) => {
-          if (payload.eventType === 'INSERT') {
+          if (payload.eventType === "INSERT") {
             const incident = payload.new as Incident;
             if (["ai_scored", "reported"].includes(incident.status)) {
               setIncidents((prev) => {
@@ -137,12 +127,16 @@ export default function VolunteerPage() {
               });
             }
           }
-          if (payload.eventType === 'UPDATE') {
+
+          if (payload.eventType === "UPDATE") {
             const updated = payload.new as Incident;
-            setIncidents(prev => prev.map(i => i.id === updated.id ? updated : i));
+            setIncidents((prev) =>
+              prev.map((i) => (i.id === updated.id ? updated : i))
+            );
           }
-          if (payload.eventType === 'DELETE') {
-            setIncidents(prev => prev.filter(i => i.id !== payload.old.id));
+
+          if (payload.eventType === "DELETE") {
+            setIncidents((prev) => prev.filter((i) => i.id !== payload.old.id));
           }
         }
       )
@@ -154,23 +148,17 @@ export default function VolunteerPage() {
     };
   }, []);
 
-  // ─── Online / Offline Toggle ───────────────────────────────────────────────
-
   const handleToggleOnline = async () => {
     if (!user) return;
     const next = !isOnline;
     setIsOnline(next);
-    await supabase
-      .from("profiles")
-      .update({ is_online: next })
-      .eq("id", user.id);
+    await supabase.from("profiles").update({ is_online: next }).eq("id", user.id);
   };
-
-  // ─── Accept ───────────────────────────────────────────────────────────────
 
   const handleAccept = async (incident: Incident) => {
     if (!user) return;
     setLoadingIds((s) => new Set(s).add(incident.id));
+
     await supabase
       .from("incidents")
       .update({ status: "assigned", assigned_volunteer_id: user.id })
@@ -181,16 +169,17 @@ export default function VolunteerPage() {
       volunteer_id: user.id,
       action: "accepted",
     });
-    setLoadingIds((s) => { const n = new Set(s); n.delete(incident.id); return n; });
-  };
 
-  // ─── Decline ──────────────────────────────────────────────────────────────
+    setLoadingIds((s) => {
+      const n = new Set(s);
+      n.delete(incident.id);
+      return n;
+    });
+  };
 
   const handleDecline = (incidentId: string) => {
     setIncidents((prev) => prev.filter((i) => i.id !== incidentId));
   };
-
-  // ─── Arrived ─────────────────────────────────────────────────────────────
 
   const handleArrived = async (incident: Incident) => {
     if (!user) return;
@@ -201,10 +190,9 @@ export default function VolunteerPage() {
     });
   };
 
-  // ─── Complete ─────────────────────────────────────────────────────────────
-
   const handleComplete = async (incident: Incident) => {
     if (!user) return;
+
     await supabase
       .from("incidents")
       .update({ status: "resolved" })
@@ -219,8 +207,6 @@ export default function VolunteerPage() {
     setIncidents((prev) => prev.filter((i) => i.id !== incident.id));
   };
 
-  // ─── Open OSM ─────────────────────────────────────────────────────────────
-
   const openOSM = (incident: Incident) => {
     if (incident.latitude && incident.longitude) {
       window.open(
@@ -230,8 +216,6 @@ export default function VolunteerPage() {
     }
   };
 
-  // ─── Filtered & Sorted List ───────────────────────────────────────────────
-
   const filtered = (() => {
     let list = [...incidents];
 
@@ -239,164 +223,81 @@ export default function VolunteerPage() {
       list = list.filter((i) => i.assigned_volunteer_id === user?.id);
     } else if (activeTab === "nearest" && userLocation) {
       list = list
-        .filter((i) => i.status !== "resolved")
         .map((i) => ({
           ...i,
           _dist:
             i.latitude && i.longitude
-              ? haversineKm(userLocation.lat, userLocation.lng, i.latitude, i.longitude)
+              ? haversineKm(
+                userLocation.lat,
+                userLocation.lng,
+                i.latitude,
+                i.longitude
+              )
               : Infinity,
         }))
         .sort((a: any, b: any) => a._dist - b._dist);
     } else {
-      // score: default, filter out resolved (unless accepted tab)
-      list = list
-        .filter((i) => i.status !== "resolved")
-        .sort((a, b) => b.urgency_score - a.urgency_score);
+      list = list.sort((a, b) => b.urgency_score - a.urgency_score);
     }
 
     return list;
   })();
 
-  // ─── Render ───────────────────────────────────────────────────────────────
-
   return (
     <div className={styles.container}>
-      {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.heading}>Volunteer Dashboard</h1>
-        <div className={styles.toggleWrapper}>
-          <span className={styles.toggleLabel}>
-            {isOnline ? "Online" : "Offline"}
-          </span>
-          <button
-            className={`${styles.toggleBtn} ${isOnline ? styles.toggleOn : styles.toggleOff}`}
-            onClick={handleToggleOnline}
-            aria-label="Toggle online status"
-          >
-            <span className={styles.toggleThumb} />
-          </button>
-        </div>
+
+        <button onClick={handleToggleOnline}>
+          {isOnline ? "Online" : "Offline"}
+        </button>
       </div>
 
-      {/* Filter Tabs */}
       <div className={styles.tabs}>
         {(["score", "nearest", "accepted"] as FilterTab[]).map((tab) => (
           <button
             key={tab}
-            className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ""}`}
             onClick={() => setActiveTab(tab)}
+            className={activeTab === tab ? styles.activeTab : ""}
           >
-            {tab === "score"
-              ? "AI Score (High to Low)"
-              : tab === "nearest"
-                ? "Nearest"
-                : "Accepted"}
+            {tab}
           </button>
         ))}
       </div>
 
-      {/* Task Feed */}
+      {/* FEED */}
       <div className={styles.feed}>
         {filtered.length === 0 && (
           <p className={styles.empty}>No tasks available.</p>
         )}
 
+        {!isOnline && (
+          <p
+            style={{
+              fontSize: "0.75rem",
+              color: "#f97316",
+              textAlign: "center",
+              margin: "8px 0",
+            }}
+          >
+            Go online to accept tasks
+          </p>
+        )}
+
         {filtered.map((incident) => {
-          const isAccepted =
-            incident.status === "assigned" &&
-            incident.assigned_volunteer_id === user?.id;
           const loading = loadingIds.has(incident.id);
-          const dist =
-            userLocation && incident.latitude && incident.longitude
-              ? haversineKm(
-                userLocation.lat,
-                userLocation.lng,
-                incident.latitude,
-                incident.longitude
-              ).toFixed(1) + " km"
-              : "—";
 
           return (
-            <div
-              key={incident.id}
-              className={styles.card}
-              style={{ borderLeftColor: urgencyColor(incident.urgency_score) }}
-            >
-              {/* Card Top */}
-              <div className={styles.cardTop}>
-                <div>
-                  <h2 className={styles.cardTitle}>
-                    {deriveTitle(incident.category)}
-                  </h2>
-                  <p className={styles.cardAddress}>{incident.address}</p>
-                </div>
-                <div className={styles.cardMeta}>
-                  <span
-                    className={styles.scoreBadge}
-                    style={{ backgroundColor: urgencyColor(incident.urgency_score) }}
-                  >
-                    AI SCORE: {incident.urgency_score}/10
-                  </span>
-                  {isAccepted && (
-                    <span className={styles.acceptedBadge}>ACCEPTED</span>
-                  )}
-                </div>
-              </div>
+            <div key={incident.id} className={styles.card}>
+              <h3>{deriveTitle(incident.category)}</h3>
+              <p>{incident.description}</p>
 
-              {/* Description */}
-              <p className={styles.cardDesc}>{incident.description}</p>
-
-              {/* Footer row */}
-              <div className={styles.cardFooter}>
-                <span className={styles.metaInfo}>📍 {dist}</span>
-                <span className={styles.metaInfo}>
-                  🕐 {timeAgo(incident.created_at)}
-                </span>
-                <button
-                  className={styles.osmBtn}
-                  onClick={() => openOSM(incident)}
-                  title="Open in OpenStreetMap"
-                >
-                  🗺 Navigate
-                </button>
-              </div>
-
-              {/* Action Buttons */}
-              <div className={styles.actions}>
-                {!isAccepted ? (
-                  <>
-                    <button
-                      className={styles.btnAccept}
-                      disabled={loading || !isOnline}
-                      onClick={() => handleAccept(incident)}
-                    >
-                      {loading ? "Accepting…" : "Accept"}
-                    </button>
-                    <button
-                      className={styles.btnDecline}
-                      onClick={() => handleDecline(incident.id)}
-                    >
-                      Decline
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className={styles.btnArrived}
-                      onClick={() => handleArrived(incident)}
-                    >
-                      Arrived
-                    </button>
-                    <button
-                      className={styles.btnComplete}
-                      onClick={() => handleComplete(incident)}
-                    >
-                      Complete
-                    </button>
-                  </>
-                )}
-              </div>
+              <button
+                disabled={loading || !isOnline}
+                onClick={() => handleAccept(incident)}
+              >
+                Accept
+              </button>
             </div>
           );
         })}

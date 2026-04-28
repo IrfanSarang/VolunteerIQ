@@ -1,17 +1,6 @@
-import subprocess
-import sys
-
-# Auto-download spaCy model if not present
-try:
-    import spacy
-    spacy.load("en_core_web_sm")
-except OSError:
-    subprocess.run([sys.executable, "-m", "spacy", "download", "en_core_web_sm"], check=True)
-
-import spacy
-
-# Load model once at module level
-nlp = spacy.load("en_core_web_sm")
+"""
+Lightweight crisis scoring system — NO spaCy (Vercel safe)
+"""
 
 # ─── Urgency Keywords with Weights ────────────────────────────────────────────
 URGENCY_KEYWORDS = {
@@ -45,67 +34,68 @@ URGENCY_KEYWORDS = {
 
 # ─── Category Keywords ────────────────────────────────────────────────────────
 CATEGORY_KEYWORDS = {
-    "Medical":    ["medical", "hospital", "injured", "ambulance", "sick",
-                   "insulin", "bleeding", "dying", "unconscious"],
-    "Food":       ["food", "hungry", "meal", "water", "supply", "dry ration"],
+    "Medical": ["medical", "hospital", "injured", "ambulance", "sick",
+                "insulin", "bleeding", "dying", "unconscious"],
+    "Food": ["food", "hungry", "meal", "water", "supply", "ration"],
     "Evacuation": ["evacuate", "trapped", "rescue", "stranded", "flood", "fire"],
-    "Logistics":  ["route", "transport", "deliver", "move", "truck", "debris"],
-    "Shelter":    ["shelter", "cot", "blanket", "housing", "night", "camp"]
+    "Logistics": ["route", "transport", "deliver", "move", "truck", "debris"],
+    "Shelter": ["shelter", "cot", "blanket", "housing", "camp"]
 }
 
-TIME_WORDS = {"hour", "night", "day"}
+TIME_WORDS = {"hour", "hours", "day", "days", "night"}
+
+
+def simple_lemma(word: str) -> str:
+    """Very small stemmer to reduce word forms."""
+    for suffix in ("ing", "ed", "es", "s", "ly"):
+        if word.endswith(suffix) and len(word) > len(suffix) + 2:
+            return word[:-len(suffix)]
+    return word
 
 
 def score_incident(description: str) -> dict:
     """
-    Analyze a crisis report description and return urgency score + category.
-
-    Returns:
-        dict: { 'urgency_score': int (1–10), 'category': str }
+    Analyze crisis text and return urgency score + category.
+    Vercel-safe (no ML models).
     """
+
     if not description or not description.strip():
         return {"urgency_score": 1, "category": "General"}
 
-    # ── Override for specific test cases ──
     lower_desc = description.lower().strip()
-    if lower_desc == 'elderly patient needs insulin urgent':
-        return {"urgency_score": 9, "category": "Medical"}
-    if lower_desc == 'need some help with boxes':
-        return {"urgency_score": 3, "category": "Logistics"}
+    words = lower_desc.split()
 
-    doc = nlp(lower_desc)
+    # Apply simple stemming
+    lemmas = [simple_lemma(w.strip(".,!?;:")) for w in words]
+    tokens = set(words + lemmas)
+
     total_score = 0
-    category_hits: dict[str, int] = {cat: 0 for cat in CATEGORY_KEYWORDS}
+    category_hits = {cat: 0 for cat in CATEGORY_KEYWORDS}
 
-    for token in doc:
-        lemma = token.lemma_
+    for token in tokens:
+        # Urgency scoring
+        for level in URGENCY_KEYWORDS.values():
+            if token in level["words"]:
+                total_score += level["score"]
 
-        # ── Urgency scoring ──
-        for level, data in URGENCY_KEYWORDS.items():
-            if lemma in data["words"]:
-                total_score += data["score"]
-
-        # ── Category hit counting ──
+        # Category scoring
         for category, keywords in CATEGORY_KEYWORDS.items():
-            if lemma in keywords or token.text in keywords:
+            if token in keywords:
                 category_hits[category] += 1
 
-        # ── Bonus: large group (numbers > 10) ──
-        if token.like_num:
-            try:
-                if float(token.text) > 10:
-                    total_score += 1
-            except ValueError:
-                pass
-
-        # ── Bonus: time-sensitive words ──
-        if lemma in TIME_WORDS:
+        # Bonus: time sensitivity
+        if token in TIME_WORDS:
             total_score += 1
 
-    # ── Clamp score between 1 and 10 ──
+        # Bonus: numeric urgency
+        try:
+            if float(token) > 10:
+                total_score += 1
+        except ValueError:
+            pass
+
     final_score = max(1, min(10, total_score))
 
-    # ── Determine best category ──
     best_category = max(category_hits, key=category_hits.get)
     category = best_category if category_hits[best_category] > 0 else "General"
 
