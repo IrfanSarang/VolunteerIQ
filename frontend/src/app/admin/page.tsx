@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import "leaflet/dist/leaflet.css";
 import styles from "./page.module.css";
-import { supabase } from "@/lib/supabaseClient";  // ✅ shared singleton
+import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
 
 interface Incident {
@@ -27,8 +28,6 @@ interface Volunteer {
   is_online?: boolean;
 }
 
-// ✅ Removed: createClient import and local supabase const
-
 function urgencyColor(score: number) {
   if (score >= 8) return "#ef4444";
   if (score >= 5) return "#f97316";
@@ -44,7 +43,16 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [assignModal, setAssignModal] = useState<Incident | null>(null);
-  const { signOut } = useAuth();
+  const { signOut, user, profile } = useAuth();
+  const router = useRouter();
+
+  // 🔒 ROLE GUARD — redirects non-admins away
+  useEffect(() => {
+    if (!user || !profile) return;
+    if (profile.role !== 'admin') {
+      router.replace('/login');
+    }
+  }, [user, profile, router]);
 
   useEffect(() => {
     async function fetchData() {
@@ -54,10 +62,10 @@ export default function AdminPage() {
           supabase.from("incidents").select("*").order("created_at", { ascending: false }),
           supabase.from("profiles").select("*").eq("role", "volunteer"),
         ]);
-        
+
         if (incErr) console.error("Error fetching incidents:", incErr);
         if (volErr) console.error("Error fetching volunteers:", volErr);
-        
+
         setIncidents(inc || []);
         setVolunteers(vol || []);
       } catch (err) {
@@ -192,7 +200,7 @@ export default function AdminPage() {
           <button className={styles.iconBtn}>
             <span className="material-symbols-outlined">settings</span>
           </button>
-           <button className={styles.avatarBtn} onClick={signOut} title="Sign Out">
+          <button className={styles.avatarBtn} onClick={signOut} title="Sign Out">
             <span className="material-symbols-outlined">logout</span>
           </button>
         </div>

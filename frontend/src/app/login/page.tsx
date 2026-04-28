@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import styles from "./page.module.css";
 
@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const justRegistered = searchParams.get("registered") === "1";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,11 +49,11 @@ export default function LoginPage() {
       }
 
       console.log("Profile found, role:", profile.role);
-      
+
       // Normalize role and determine target path
       const role = (profile.role || "").toLowerCase().trim();
       let targetPath = `/${role}`;
-      
+
       if (role === "receiver" || role === "requester") {
         targetPath = "/requester";
       } else if (role === "volunteer" || role === "volunterr") {
@@ -63,15 +65,7 @@ export default function LoginPage() {
         targetPath = "/";
       }
 
-      console.log("Redirecting to target path:", targetPath);
-      router.push(targetPath);
-      // Fallback: forcefully change location if router.push fails to trigger
-      setTimeout(() => {
-        if (window.location.pathname === "/login") {
-          console.log("Router push might have stalled, using window.location...");
-          window.location.href = targetPath;
-        }
-      }, 2000);
+      window.location.href = targetPath;
     } catch (err: any) {
       console.error("Unexpected login error:", err);
       setError(err?.message || "An unexpected error occurred. Please try again.");
@@ -90,6 +84,11 @@ export default function LoginPage() {
       </div>
 
       <div className={styles.card}>
+        {justRegistered && (
+          <div style={{ background: "#e8f5e9", border: "1px solid #a5d6a7", borderRadius: "8px", padding: "12px 16px", marginBottom: "1rem", color: "#2e7d32", fontSize: "0.875rem", textAlign: "center" }}>
+            ✅ Account created! Check your email to confirm, then log in.
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
             <div className={styles.formLabelRow}>

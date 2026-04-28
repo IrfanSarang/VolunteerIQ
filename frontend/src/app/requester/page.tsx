@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const navItems = [
   { icon: "sensors", label: "Live Feed" },
@@ -14,7 +15,14 @@ const navItems = [
 ];
 
 export default function RequesterPage() {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const router = useRouter();
+  useEffect(() => {
+    if (!user || !profile) return;
+    if (profile.role !== 'requester' && profile.role !== 'receiver') {
+      router.replace('/login');
+    }
+  }, [user, profile, router]);
 
   const [activeNav, setActiveNav] = useState(-1);
   const [reportText, setReportText] = useState("");
@@ -157,18 +165,18 @@ export default function RequesterPage() {
   /* ---------------- UI ---------------- */
   return (
     <div className={styles.dashboardLayout}>
-       <header className={styles.topBar}>
+      <header className={styles.topBar}>
         <div className={styles.topBarLogo}>VolunteerIQ</div>
-        <button 
-          onClick={signOut} 
-          style={{ 
-            background: "none", 
-            border: "none", 
-            color: "#64748b", 
-            cursor: "pointer", 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "4px" 
+        <button
+          onClick={signOut}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#64748b",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px"
           }}
         >
           <span className="material-symbols-outlined">logout</span>

@@ -15,6 +15,7 @@ interface FormErrors {
   password?: string;
   skills?: string;
   role?: string;
+  terms?: string;
 }
 
 export default function SignupPage() {
@@ -38,10 +39,10 @@ export default function SignupPage() {
     if (password.length < 6) newErrors.password = "Password must be at least 6 characters.";
     if (!skills.trim() && role === "volunteer") newErrors.skills = "Please enter at least one skill.";
     if (!role) newErrors.role = "Please select a role.";
+    if (!termsChecked) newErrors.terms = "You must accept the Terms & Conditions.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError("");
@@ -55,6 +56,8 @@ export default function SignupPage() {
       if (signUpError || !data.user) {
         if (signUpError?.message === "Failed to fetch") {
           setSubmitError("Cannot connect to database. Please check your Supabase configuration.");
+        } else if (signUpError?.message?.includes("already registered") || signUpError?.message?.includes("already exists")) {
+          setSubmitError("An account with this email already exists. Please log in instead.");
         } else {
           setSubmitError(signUpError?.message || "Signup failed. Please try again.");
         }
@@ -218,14 +221,18 @@ export default function SignupPage() {
               I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>.
             </label>
           </div>
-
+          {errors.terms && (
+            <div style={{ color: "#c62828", fontSize: "0.75rem", marginTop: "4px" }}>
+              {errors.terms}
+            </div>
+          )}
           {submitError && (
             <div style={{ color: "#c62828", fontSize: "0.85rem", marginBottom: "1rem", textAlign: "center", fontWeight: 600 }}>
               {submitError}
             </div>
           )}
 
-          <button type="submit" className={styles.submitBtn} disabled={!termsChecked || loading}>
+          <button type="submit" className={styles.submitBtn} disabled={loading}>
             {loading ? (
               <span className="material-symbols-outlined" style={{ animation: "spin 1s linear infinite" }}>
                 sync

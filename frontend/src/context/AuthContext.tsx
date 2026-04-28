@@ -103,7 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (isProtected && !user) {
             router.replace('/login')
         }
-    }, [user, loading, pathname, router])
+        // Role-based redirect: prevent logged-in users from seeing /login again
+        if (!isProtected && user && profile && pathname.startsWith('/login')) {
+            const role = (profile.role || '').toLowerCase().trim()
+            if (role === 'admin') router.replace('/admin')
+            else if (role === 'volunteer') router.replace('/volunteer')
+            else if (role === 'requester' || role === 'receiver') router.replace('/requester')
+        }
+    }, [user, profile, loading, pathname, router])
 
     async function signOut() {
         await supabase.auth.signOut()
